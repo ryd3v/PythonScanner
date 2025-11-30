@@ -10,13 +10,13 @@
 
 ## Features
 
-| Feature | Description |
-|---------|-------------|
-| **Subnet scan** | Accepts a CIDR block (e.g., `192.168.2.0/24`) and pings every address in that range. |
-| **ARP lookup** | Retrieves the MAC address of each live host via `ip neigh` (Linux/macOS) or `arp -a` (Windows). |
-| **Vendor discovery** | Uses the `mac_vendor_lookup` library to resolve the MAC prefix to a vendor name. |
-| **Threaded execution** | Scans up to 100 hosts in parallel (configurable). |
-| **Clean output** | Prints a simple table: `IP Address | MAC Address | Vendor`. |
+| Feature                | Description                                                                                     |
+|------------------------|-------------------------------------------------------------------------------------------------|
+| **Subnet scan**        | Accepts a CIDR block (e.g., `192.168.2.0/24`) and pings every address in that range.            |
+| **ARP lookup**         | Retrieves the MAC address of each live host via `ip neigh` (Linux/macOS) or `arp -a` (Windows). |
+| **Vendor discovery**   | Uses the `mac_vendor_lookup` library to resolve the MAC prefix to a vendor name.                |
+| **Threaded execution** | Scans up to 100 hosts in parallel (configurable).                                               |
+| **Clean output**       | Prints a simple table: IP Address, MAC Address, Vendor.                                         |
 
 ---
 
