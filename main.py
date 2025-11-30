@@ -36,13 +36,15 @@ try:
 except ImportError:
     MacLookup = None
 
+
 def ping(host: str, timeout=1) -> bool:
-    param = '-n' if platform.system().lower() == 'windows' else '-c'
-    command = ['ping', param, '1', '-W', str(timeout), host]
+    param = "-n" if platform.system().lower() == "windows" else "-c"
+    command = ["ping", param, "1", "-W", str(timeout), host]
     try:
         # Suppress output
-        result = subprocess.run(command, stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        result = subprocess.run(
+            command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
         return result.returncode == 0
     except Exception:
         return False
@@ -50,23 +52,27 @@ def ping(host: str, timeout=1) -> bool:
 
 def arp_request(host: str) -> tuple[str, str]:
     try:
-        if platform.system().lower() == 'windows':
+        if platform.system().lower() == "windows":
             # Windows: ensure the entry exists
-            subprocess.run(['arp', '-a', host], stdout=subprocess.DEVNULL,
-                           stderr=subprocess.DEVNULL)
-            output = subprocess.check_output(['arp', '-a'], text=True)
+            subprocess.run(
+                ["arp", "-a", host],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            output = subprocess.check_output(["arp", "-a"], text=True)
         else:
             # Unix-like: use ip neigh (no usage output)
-            output = subprocess.check_output(['ip', 'neigh', 'show', host],
-                                             text=True, stderr=subprocess.DEVNULL)
+            output = subprocess.check_output(
+                ["ip", "neigh", "show", host], text=True, stderr=subprocess.DEVNULL
+            )
 
         for line in output.splitlines():
             # Lines look like: 192.168.1.5 dev eth0 lladdr 00:11:22:33:44:55 REACHABLE
             if host in line:
                 parts = line.split()
-                mac_candidates = [p for p in parts if ':' in p or '-' in p]
+                mac_candidates = [p for p in parts if ":" in p or "-" in p]
                 if mac_candidates:
-                    mac = mac_candidates[0].replace('-', ':')
+                    mac = mac_candidates[0].replace("-", ":")
                     return host, mac
         return host, ""
     except Exception:
@@ -86,15 +92,16 @@ def get_vendor(mac: str) -> str:
 
 def cidr_hosts(cidr: str):
     try:
-        ip, mask = cidr.split('/')
+        ip, mask = cidr.split("/")
         mask = int(mask)
-        start = struct.unpack('>I', socket.inet_aton(ip))[0]
+        start = struct.unpack(">I", socket.inet_aton(ip))[0]
         end = start + (1 << (32 - mask)) - 1
         for ip_int in range(start, end + 1):
-            yield socket.inet_ntoa(struct.pack('>I', ip_int))
+            yield socket.inet_ntoa(struct.pack(">I", ip_int))
     except Exception as e:
         print(f"Error parsing CIDR '{cidr}': {e}")
         sys.exit(1)
+
 
 def scan_subnet(cidr: str, threads=100):
     results = []
@@ -103,7 +110,7 @@ def scan_subnet(cidr: str, threads=100):
         if ping(ip):
             _, mac = arp_request(ip)
             vendor = get_vendor(mac) if mac else "Unknown"
-            return {'ip': ip, 'mac': mac or "N/A", 'vendor': vendor}
+            return {"ip": ip, "mac": mac or "N/A", "vendor": vendor}
         return None
 
     with ThreadPoolExecutor(max_workers=threads) as executor:
@@ -120,8 +127,9 @@ def print_results(results):
     header = f"{'IP Address':<15} {'MAC Address':<20} Vendor"
     print("\n" + header)
     print("-" * len(header))
-    for r in sorted(results, key=lambda x: socket.inet_aton(x['ip'])):
+    for r in sorted(results, key=lambda x: socket.inet_aton(x["ip"])):
         print(f"{r['ip']:<15} {r['mac']:<20} {r['vendor']}")
+
 
 def main():
     if len(sys.argv) > 1:
